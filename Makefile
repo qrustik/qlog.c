@@ -1,12 +1,51 @@
-CC = gcc
-CFLAGS = -std=c11 -Werror -Wall -Wextra
-DEBUG_FLAGS = -g -O0
+CC 				:= gcc
+CFLAGS 		= -Werror -Wall -Wextra -std=c11 -Iincludes
+LDFLAGS 	:= 
+DBGFLAGS 	:= -g -O0
 
-TARGET = log.a
+BIN_DIR 	:= bin
+BUILD_DIR := build
+OBJ_DIR		:= $(BUILD_DIR)/obj
+SRC_DIR		:= src
 
-$(TARGET): log.c log.h
-	$(CC) $(CFLAGS) -c log.c -o log.o
-	ar rcs $(TARGET) log.o
+SRCS			:= $(wildcard $(SRC_DIR)/*.c)
+OBJS			:= $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEPS			:= $(OBJS:.o=.d)
 
-test: $(TARGET)
-	$(CC) $(CFLAGS) test.c -l:log.a
+TARGET		:= $(BIN_DIR)/qlog.a
+
+.phony: all clean debug test build_dir debug release format
+
+all: build_dir $(TARGET)
+
+build_dir:
+	@echo $(OBJS)
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(BIN_DIR)
+
+$(TARGET): $(OBJS)
+	ar rsc $@ $^
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -MMD -c $< -o $@
+
+-include $(DEPS)
+
+clean:
+	rm -rf $(BIN_DIR)/*
+	@echo "--- clean up complete ---"
+
+test: clean $(TARGET)
+
+debug: CFLAGS += -g -O0
+debug: clean all
+	@echo "--- builded with debug flags ---"
+
+	
+release: CFLAGS += -O3
+release: clean all
+	@echo "--- Release build ---"
+
+
+format:
+	clang-format -i */*.c */*.h --style=Google

@@ -1,10 +1,10 @@
-#include <stdio.h>
+#include "log.h"
+
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include "log.h"
 
 /*
     ХОТЕЛКИ ОТ ЛОГЕРА:
@@ -16,44 +16,42 @@
     -*удобная настройка цвета
 */
 
+const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
+                            "WARNING", "ERROR", "FATAL"};
+log_cfg cfg = {0};
 
-logger_t logger = {0};
-
-static lvl getenv_level(const char* env) {
-    lvl level = OFF;
-    char *LEVEL = getenv(env);
-
-    if (strcmp(LEVEL, "INFO"))
-        level = INFO;
-    else if (strcmp(LEVEL, "DEBUG"))
-        level = DEBUG;
-    else if (strcmp(LEVEL, "WARN"))
-        level = WARN;
-    return level;
+static int parse_format(const char* buf, const char* delim){
+	(void)buf;
+	(void)delim;
+	return 0;
 }
 
-static void init(const char* fmt, lvl level) {
-    if (level == OFF) {
-        logger.level = getenv_level("LOG_LEVEL");
-    }else {
-        logger.level = level;
-    }
 
-    if(fmt == NULL){
-        logger.fmt = "[%s][%s] %s:%d=>%s msg:%s";
-    }else{
-        logger.fmt = fmt;
-    }
+static void load_cfg(const char* path) {
+  FILE* f = fopen(path, "ro");
+  char buf[MAX_BUF] = {0};
+  char* delim = "=";
+  while (fgets(buf, MAX_BUF, f)) {
+    if (buf[0] == '\n' || buf[0] == '#') continue;
+		if (!parse_format(buf, delim)) LOGW("qlog cant parse format string: %s\tfrom file: %s\n", buf, path);
+  }
+  fclose(f);
 }
 
-void log(const char* fmt, ...){
-    va_list args;
-    if (!logger.is_init) init(NULL, OFF);
-    char buf[16];
-    time_t t = time(NULL);
-    
-    buf[strftime(buf, 16, "%Y-%m-%d %H:%M:%S", localtime(&t))] = 0;
-    // fprintf(logger.fmt, logger.level, buf, );
-    vfprintf(stderr, fmt, args);
-    va_end(args);
+static void log_fprint(FILE* stream, const log_info* info){
+	(void)stream;
+	(void)info;
+}
+
+
+void log_msg(log_info info, const char* fmt, ...) {
+  va_list args;
+  if (!cfg.is_load) {
+    char* path = getenv("LOG_CFG_PATH");
+    load_cfg(path);
+  }
+	va_start(args, fmt);
+  log_fprint(stderr, &info);
+	vfprintf(stderr, fmt, args);
+  va_end(args);
 }

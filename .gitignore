@@ -6,3 +6,4 @@
 *.gcno
 *.gcov
 report
+build
