@@ -1,3 +1,9 @@
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
 #include "log.h"
 
 /*
@@ -47,7 +53,7 @@ void log(const char* fmt, ...){
     time_t t = time(NULL);
     
     buf[strftime(buf, 16, "%Y-%m-%d %H:%M:%S", localtime(&t))] = 0;
-    fprintf(logger.fmt, logger.level, buf, );
+    // fprintf(logger.fmt, logger.level, buf, );
     vfprintf(stderr, fmt, args);
     va_end(args);
 }

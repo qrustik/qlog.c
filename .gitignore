@@ -1,0 +1,8 @@
+*.o
+*.a
+*.out
+*.dll
+*.gcda
+*.gcno
+*.gcov
+report
