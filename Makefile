@@ -32,7 +32,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 -include $(DEPS)
 
 clean:
-	rm -rf $(BIN_DIR)/*
+	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/*
 	@echo "--- clean up complete ---"
 
 test: clean $(TARGET)
