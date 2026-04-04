@@ -1,18 +1,18 @@
-CC 				:= gcc
-CFLAGS 		= -Werror -Wall -Wextra -std=c11 -Iincludes
-LDFLAGS 	:= 
-DBGFLAGS 	:= -g -O0
+CC:= gcc
+CFLAGS= -Werror -Wall -Wextra -std=c11 -Iincludes
+LDFLAGS:= 
+DBGFLAGS:= -g -O0
 
-BIN_DIR 	:= bin
-BUILD_DIR := build
-OBJ_DIR		:= $(BUILD_DIR)/obj
-SRC_DIR		:= src
+BIN_DIR:= bin
+BUILD_DIR:= build
+OBJ_DIR:= $(BUILD_DIR)/obj
+SRC_DIR:= src
 
-SRCS			:= $(wildcard $(SRC_DIR)/*.c)
-OBJS			:= $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-DEPS			:= $(OBJS:.o=.d)
+SRCS:= $(wildcard $(SRC_DIR)/*.c)
+OBJS:= $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEPS:= $(OBJS:.o=.d)
 
-TARGET		:= $(BIN_DIR)/qlog.a
+TARGET:= $(BIN_DIR)/qlog.a
 
 .phony: all clean debug test build_dir debug release format
 

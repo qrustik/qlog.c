@@ -16,9 +16,12 @@
     -*удобная настройка цвета
 */
 
-const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
+// returns b if a is NULL
+#define IS_NULL(a, b) (a == NULL) ? b : a
+
+static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
                             "WARNING", "ERROR", "FATAL"};
-log_cfg cfg = {0};
+static log_cfg cfg = {0};
 
 static int parse_format(const char* format) {
   size_t count = 0;
@@ -28,18 +31,22 @@ static int parse_format(const char* format) {
   while (*format) {
     if (*format == '%') {
       *fmt++ = *format++;
-      index = strspn(specs, *format);
+      index = strspn(specs, format);
       if (index != 4) {
         cfg.order[count] = index;
       }
     } else {
+      *fmt++ = *format;
     }
   }
   return 0;
 }
 
-static void load_cfg(const char* path) {
-  FILE* f = fopen(path, "ro");
+static int load_cfg(const char* path) {
+  FILE* f = fopen(IS_NULL(path, DEFAULT_PATH), "ro");
+  if (f == NULL) {
+    fprintf(stderr, "Failed open file with name: %s", IS_NULL(path, DEFAULT_PATH));
+  }
   char buf[MAX_BUF] = {0};
   while (fgets(buf, MAX_BUF, f)) {
     if (buf[0] == '\n' || buf[0] == '#') continue;
@@ -50,6 +57,7 @@ static void load_cfg(const char* path) {
     }
   }
   fclose(f);
+  return 0;
 }
 
 static void log_fprint(FILE* stream, const log_info* info) {
@@ -58,12 +66,12 @@ static void log_fprint(FILE* stream, const log_info* info) {
 }
 
 void log_msg(log_info info, const char* fmt, ...) {
-  if (info.level < cfg.level) return;
-  va_list args;
   if (!cfg.is_load) {
-    char* path = getenv("LOG_CFG_PATH");
+    char* path = getenv(CFG_PATH_ENV);
     load_cfg(path);
   }
+  if (info.level < cfg.level) return;
+  va_list args;
   va_start(args, fmt);
   log_fprint(stderr, &info);
   vfprintf(stderr, fmt, args);

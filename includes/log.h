@@ -8,6 +8,9 @@ extern const char* LOG_LEVELS[];
 #define MAX_FMT 16
 #define MAX_BUF 256
 
+#define DEFAULT_PATH "qlog.config"
+#define CFG_PATH_ENV "LOG_CFG_PATH"
+
 #define LOGT(fmt, ...) LOG(TRACE, fmt, __VA_ARGS__)
 #define LOGD(fmt, ...) LOG(DEBUG, fmt, __VA_ARGS__)
 #define LOGI(fmt, ...) LOG(INFO, fmt, __VA_ARGS__)
@@ -37,8 +40,6 @@ typedef struct {
   int is_load;
   int order[4];
 } log_cfg;
-
-extern log_cfg cfg;
 
 void log_msg(log_info info, const char* fmt, ...);
 
