@@ -40,7 +40,6 @@ test: clean $(TARGET)
 debug: CFLAGS += -g -O0
 debug: clean all
 	@echo "--- builded with debug flags ---"
-
 	
 release: CFLAGS += -O3
 release: clean all
