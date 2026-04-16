@@ -30,8 +30,9 @@
 // function
 log_cfg cfg = {0};
 
-static void init_cfg() { memset(cfg.order, -1, sizeof(cfg.order)); }
 static int is_has_index(int array[CNT_INFO_FIELDS], int index);
+//
+static void init_cfg() { memset(cfg.order, -1, sizeof(cfg.order)); }
 
 /**
  * @brief Parses the format of the string from the file and sets the index of
@@ -67,6 +68,7 @@ void parse_format(const char* format) {
   }
 }
 
+// check array has index
 static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
   int ret = 0;
   for (int i = 0; i < CNT_INFO_FIELDS; i++) {
@@ -84,10 +86,11 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
  * @return status code if 0 - success, 1 - something went wrong
  */
 int load_cfg(const char* path) {
-  FILE* f = fopen(GET_OR(path, DEFAULT_PATH), "ro");
+  FILE* f = fopen(GET_OR(path, DEFAULT_CFG_PATH), "ro");
   if (f == NULL) {
-    fprintf(stderr, "Failed open file with name: %s",
-            GET_OR(path, DEFAULT_PATH));
+    fprintf(stderr, "Failed open file with name: %s\n",
+            GET_OR(path, DEFAULT_CFG_PATH));
+    return EXIT_FAILURE;
   }
   char buf[MAX_BUF] = {0};
   while (fgets(buf, MAX_BUF, f)) {
@@ -99,7 +102,7 @@ int load_cfg(const char* path) {
     }
   }
   fclose(f);
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 void log_fprint(FILE* stream, const log_info* info) {
@@ -117,7 +120,9 @@ void log_fprint(FILE* stream, const log_info* info) {
 void log_msg(log_info info, const char* fmt, ...) {
   if (!cfg.is_load) {
     char* path = getenv(CFG_PATH_ENV);
-    load_cfg(path);
+    if (load_cfg(path) == EXIT_FAILURE) {
+      load_default_cfg();
+    }
   }
   if (info.level < cfg.level) return;
   va_list args;
@@ -125,4 +130,14 @@ void log_msg(log_info info, const char* fmt, ...) {
   log_fprint(stderr, &info);
   vfprintf(stderr, fmt, args);
   va_end(args);
+}
+
+void load_default_cfg() {
+  fprintf(stderr, "Loading default configuration for logger\n");
+  strcpy(cfg.fmt, DEFAULT_FORMAT);
+  strcpy(cfg.date_fmt, DEFAULT_DATE_FORMAT);
+  cfg.level = INFO;
+  memcpy(cfg.order, DEFAULT_ORDER, sizeof(cfg.order));
+  strcpy(cfg.filepath, DEFAULT_FILEPATH);
+  cfg.is_load = 1;
 }

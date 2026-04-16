@@ -1,15 +1,29 @@
 #ifndef LOG_H
 #define LOG_H
 
-typedef enum { TRACE, DEBUG, INFO, WARNING, ERROR, FATAL, OFF } log_level_t;
+typedef enum log_level {
+  TRACE,
+  DEBUG,
+  INFO,
+  WARNING,
+  ERROR,
+  FATAL,
+  OFF
+} log_level_t;
 // maximum length of format string
-#define MAX_FMT 16
+#define MAX_FMT 64
 // maximum length of other strings like filepath
 #define MAX_BUF 256
 #define CNT_INFO_FIELDS 4
 
-#define DEFAULT_PATH "qlog.config"
+#define DEFAULT_CFG_PATH "qlog.config"
 #define CFG_PATH_ENV "LOG_CFG_PATH"
+
+#define DEFAULT_FORMAT "[%s]\t%s:%d\t%s\n"
+#define DEFAULT_DATE_FORMAT "%H:%M:%S"
+#define DEFAULT_FILEPATH __DATE__ ".log"
+#define DEFAULT_ORDER ((int[4]){2, 0, 3, 1})
+#define DEFAULT_LEVEL INFO
 
 // print log with TRACE level
 #define LOGT(fmt, ...) LOG(TRACE, fmt, __VA_ARGS__)
@@ -32,7 +46,7 @@ typedef enum { TRACE, DEBUG, INFO, WARNING, ERROR, FATAL, OFF } log_level_t;
           fmt, __VA_ARGS__)
 
 // Contains meta info about running programm
-typedef struct {
+typedef struct log_info {
   const char* filename;
   const char* funcname;
   log_level_t level;
@@ -40,16 +54,18 @@ typedef struct {
 } log_info;
 
 // Contains logger options for output log info
-typedef struct {
+typedef struct log_config {
   char fmt[MAX_FMT];
   char date_fmt[MAX_FMT];
-  char cfg_filename[MAX_BUF];
+  char filepath[MAX_BUF];
   log_level_t level;
   int is_load;
   int order[CNT_INFO_FIELDS];
 } log_cfg;
 
 void log_msg(log_info info, const char* fmt, ...);
+
+void load_default_cfg();
 
 // Remove from release version
 void parse_format(const char* format);
