@@ -6,7 +6,7 @@ export BUILD_DIR:= build
 export OBJ_DIR:= $(BUILD_DIR)/obj
 export SRC_DIR:= src
 
-export CK_FORK=no
+export CK_FORK = yes
 
 SRCS:= $(wildcard $(SRC_DIR)/*.c)
 OBJS:= $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -37,9 +37,10 @@ test: $(TARGET)
 run: test
 	./$(BIN_DIR)/test
 
-debug: CFLAGS += -g -O0
+debug: 
+	CFLAGS += -g -O0
 debug: clean test
-	lldb $(BIN_DIR)/test
+	CK_FORK=no; lldb $(BIN_DIR)/test
 	@echo "--- builded with debug flags ---"
 	
 release: CFLAGS += -O3
