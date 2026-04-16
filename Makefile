@@ -1,44 +1,48 @@
 CC:= gcc
-CFLAGS= -Werror -Wall -Wextra -std=c11 -Iincludes
+CFLAGS= -Werror -Wall -Wextra -std=c11 -Iincludes -MMD -MP
 LDFLAGS:= 
 DBGFLAGS:= -g -O0
 
-BIN_DIR:= bin
-BUILD_DIR:= build
-OBJ_DIR:= $(BUILD_DIR)/obj
-SRC_DIR:= src
+export BIN_DIR:= bin
+export BUILD_DIR:= build
+export OBJ_DIR:= $(BUILD_DIR)/obj
+export SRC_DIR:= src
+
+export CK_FORK=no
 
 SRCS:= $(wildcard $(SRC_DIR)/*.c)
 OBJS:= $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 DEPS:= $(OBJS:.o=.d)
 
-TARGET:= $(BIN_DIR)/qlog.a
+export TARGET:= $(BIN_DIR)/qlog.a
 
 .phony: all clean debug test build_dir debug release format
 
-all: build_dir $(TARGET)
+all: $(TARGET)
 
 build_dir:
 	@echo $(OBJS)
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(BIN_DIR)
 
-$(TARGET): $(OBJS)
-	ar rsc $@ $^
+$(TARGET): build_dir $(OBJS)
+	ar rsc $@ $(OBJS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -MMD -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 -include $(DEPS)
 
-clean:
-	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/*
-	@echo "--- clean up complete ---"
+test: $(TARGET)
+	$(MAKE) -C tests
 
-test: clean $(TARGET)
+run: test
+	./$(BIN_DIR)/test
+
 
 debug: CFLAGS += -g -O0
-debug: clean all
+debug: clean test
+	lldb $(BIN_DIR)/test
 	@echo "--- builded with debug flags ---"
 	
 release: CFLAGS += -O3
@@ -48,3 +52,7 @@ release: clean all
 
 format:
 	clang-format -i */*.c */*.h --style=Google
+
+clean:
+	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/*
+	@echo "--- clean up complete ---"

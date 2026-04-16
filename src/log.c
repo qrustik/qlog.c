@@ -16,38 +16,50 @@
     -*удобная настройка цвета
 */
 
-// returns b if a is NULL
-#define IS_NULL(a, b) (a == NULL) ? b : a
+// if  a is NULL returns b use preferly with variables
+#define GET_OR(a, b)         \
+  ({                         \
+    __typeof__(a) _a = (a);  \
+    (_a == NULL) ? (b) : _a; \
+  })
 
-static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
-                                   "WARNING", "ERROR", "FATAL"};
+// static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
+//                                    "WARNING", "ERROR", "FATAL"};
+
 // global configuration structure that initialized with first call LOG()
 // function
-static log_cfg cfg = {0};
+log_cfg cfg = {0};
 
 /**
  * @brief Parses the format of the string from the file and sets the index of
  * the log info structure depending on it
+ * specs:
+ * p - file path
+ * f - func name
+ * l - log level
+ * n - line number
  * @param format format string for parsing
- * @return status code if 0 - success, 1 - something went wrong
+ * @return no return
  */
-static int parse_format(const char* format) {
-  size_t count = 0;
+void parse_format(const char* format) {
   size_t index = 0;
   char* specs = "pfln";
+  char* specs_fmt = "sssd";
   char* fmt = cfg.fmt;
-  while (*format) {
+  for (size_t i = 0; *format;) {
     if (*format == '%') {
+      if (i >= 4) break;
       *fmt++ = *format++;
-      index = strspn(specs, format);
+      index = strchr(specs, *format) - specs;
       if (index != 4) {
-        cfg.order[count] = index;
+        cfg.order[i++] = index;
+        *fmt++ = specs_fmt[index];
       }
     } else {
       *fmt++ = *format;
     }
+    format++;
   }
-  return 0;
 }
 
 /**
@@ -55,11 +67,11 @@ static int parse_format(const char* format) {
  * @param path path of config file if path is NULL open DEFAULT_PATH
  * @return status code if 0 - success, 1 - something went wrong
  */
-static int load_cfg(const char* path) {
-  FILE* f = fopen(IS_NULL(path, DEFAULT_PATH), "ro");
+int load_cfg(const char* path) {
+  FILE* f = fopen(GET_OR(path, DEFAULT_PATH), "ro");
   if (f == NULL) {
     fprintf(stderr, "Failed open file with name: %s",
-            IS_NULL(path, DEFAULT_PATH));
+            GET_OR(path, DEFAULT_PATH));
   }
   char buf[MAX_BUF] = {0};
   while (fgets(buf, MAX_BUF, f)) {
@@ -74,7 +86,7 @@ static int load_cfg(const char* path) {
   return 0;
 }
 
-static void log_fprint(FILE* stream, const log_info* info) {
+void log_fprint(FILE* stream, const log_info* info) {
   (void)stream;
   (void)info;
 }

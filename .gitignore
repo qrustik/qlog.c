@@ -5,6 +5,7 @@
 *.gcda
 *.gcno
 *.gcov
-report
-build
+report/*
+build/*
 .clang-format
+bin/*
