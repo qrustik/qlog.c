@@ -30,6 +30,9 @@
 // function
 log_cfg cfg = {0};
 
+static void init_cfg() { memset(cfg.order, -1, sizeof(cfg.order)); }
+static int is_has_index(int array[CNT_INFO_FIELDS], int index);
+
 /**
  * @brief Parses the format of the string from the file and sets the index of
  * the log info structure depending on it
@@ -45,21 +48,34 @@ void parse_format(const char* format) {
   size_t index = 0;
   char* specs = "pfln";
   char* specs_fmt = "sssd";
+  init_cfg();
   char* fmt = cfg.fmt;
   for (size_t i = 0; *format;) {
-    if (*format == '%') {
-      if (i >= 4) break;
+    if (*format == '%' && i < CNT_INFO_FIELDS) {
       *fmt++ = *format++;
       index = strchr(specs, *format) - specs;
-      if (index != 4) {
+      if (index < CNT_INFO_FIELDS && !is_has_index(cfg.order, index)) {
         cfg.order[i++] = index;
         *fmt++ = specs_fmt[index];
+      } else {
+        *fmt++ = *format;
       }
     } else {
       *fmt++ = *format;
     }
     format++;
   }
+}
+
+static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
+  int ret = 0;
+  for (int i = 0; i < CNT_INFO_FIELDS; i++) {
+    if (array[i] == index) {
+      ret = 1;
+      break;
+    }
+  }
+  return ret;
 }
 
 /**
@@ -78,7 +94,7 @@ int load_cfg(const char* path) {
     if (buf[0] == '\n' || buf[0] == '#') continue;
     const char* pos = strstr(buf, "fmt");
     if (pos) {
-      pos += 4;
+      pos += strlen("fmt");
       parse_format(pos);
     }
   }

@@ -1,7 +1,5 @@
 CC:= gcc
 CFLAGS= -Werror -Wall -Wextra -std=c11 -Iincludes -MMD -MP
-LDFLAGS:= 
-DBGFLAGS:= -g -O0
 
 export BIN_DIR:= bin
 export BUILD_DIR:= build
@@ -38,7 +36,6 @@ test: $(TARGET)
 
 run: test
 	./$(BIN_DIR)/test
-
 
 debug: CFLAGS += -g -O0
 debug: clean test

@@ -6,6 +6,7 @@ typedef enum { TRACE, DEBUG, INFO, WARNING, ERROR, FATAL, OFF } log_level_t;
 #define MAX_FMT 16
 // maximum length of other strings like filepath
 #define MAX_BUF 256
+#define CNT_INFO_FIELDS 4
 
 #define DEFAULT_PATH "qlog.config"
 #define CFG_PATH_ENV "LOG_CFG_PATH"
@@ -45,7 +46,7 @@ typedef struct {
   char cfg_filename[MAX_BUF];
   log_level_t level;
   int is_load;
-  int order[4];
+  int order[CNT_INFO_FIELDS];
 } log_cfg;
 
 void log_msg(log_info info, const char* fmt, ...);

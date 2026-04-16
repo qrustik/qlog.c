@@ -2,30 +2,29 @@
 
 START_TEST(test_parse_format_basic) {
   char* fmt = "[%l] %p:%n %f";
-  char* fmt_res = "[%s] %s:%d %s";
+  char* exp_fmt = "[%s] %s:%d %s";
 
   parse_format(fmt);
-  ck_assert_str_eq(cfg.fmt, fmt_res);
+  ck_assert_str_eq(cfg.fmt, exp_fmt);
 }
 END_TEST
-// "pfln"
+// "pfln" p = 0 f = 1 l = 2 n = 3
 START_TEST(test_parse_format_order) {
   char* fmt = "[%l] %p:%n %f";
-  int res_order[] = {2, 0, 3, 1};
-
+  int exp_order[] = {2, 0, 3, 1};
   parse_format(fmt);
-  ck_assert_mem_eq(res_order, cfg.order, sizeof(res_order));
+  ck_assert_mem_eq(exp_order, cfg.order, sizeof(exp_order));
 }
 END_TEST
 
 START_TEST(test_parse_format_more_than_4_specs) {
-  char* fmt = "[%l] %p:%n %f %f %f";
-  char* res_fmt = "[%s] %s:%d %s %f %n";
-  int res_order[] = {2, 0, 3, 1};
+  char* fmt = "[%l] %p:%f %f %n %f";
+  char* exp_fmt = "[%s] %s:%s %f %d %f";
+  int exp_order[] = {2, 0, 1, 3};
 
   parse_format(fmt);
-  ck_assert_str_eq(cfg.fmt, res_fmt);
-  ck_assert_mem_eq(res_order, cfg.order, sizeof(res_order));
+  ck_assert_str_eq(cfg.fmt, exp_fmt);
+  ck_assert_mem_eq(exp_order, cfg.order, sizeof(exp_order));
 }
 END_TEST
 
