@@ -22,8 +22,10 @@ build_dir:
 
 $(TEST): $(OBJ)
 	$(CC) $(CFLAGS) $^ $(LIB_STATIC) $(LIBS) -o ../$(BIN_DIR)/$@
+	@echo "--- build target $(BIN_DIR)/$@ ---"
 
 ../$(OBJ_DIR)/$(TEST_DIR)/%.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@echo "Compile $< into $@"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 -include $(DEPS)

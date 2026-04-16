@@ -82,7 +82,7 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
  * @return status code if 0 - success, 1 - something went wrong
  */
 int load_cfg(const char* path) {
-  FILE* f = fopen(GET_OR(path, DEFAULT_CFG_PATH), "ro");
+  FILE* f = fopen(GET_OR(path, DEFAULT_CFG_PATH), "r");
   if (f == NULL) {
     fprintf(stderr, "Failed open file with name: %s\n",
             GET_OR(path, DEFAULT_CFG_PATH));
@@ -101,7 +101,10 @@ int load_cfg(const char* path) {
   return EXIT_SUCCESS;
 }
 
-// for debug
+/**
+ * @brief convert struct info to string
+ * @return number of written chars
+ */
 int info_to_string(const log_info* info, char* str) {
   const char* msg_info[CNT_INFO_FIELDS] = {0};
   for (size_t i = 0; i < CNT_INFO_FIELDS; i++) {
@@ -118,6 +121,9 @@ int info_to_string(const log_info* info, char* str) {
                  msg_info[3]);
 }
 
+/**
+ * @brief Print struct info into file stream
+ */
 void log_fprint(FILE* stream, const log_info* info) {
   char timestamp[MAX_BUF] = {0};
   time_t t = time(NULL);
@@ -142,12 +148,29 @@ void log_msg(log_info info, const char* fmt, ...) {
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();
     }
+
+    cfg.wr_file = atoi(GET_OR(getenv("WRITE_FILE"), "0"));
+    cfg.wr_stderr = atoi(GET_OR(getenv("WRITE_STDERR"), "1"));
   }
   if (info.level < cfg.level) return;
   va_list args;
   va_start(args, fmt);
-  log_fprint(stderr, &info);
-  vfprintf(stderr, fmt, args);
+  if (cfg.wr_file) {
+    FILE* f = fopen(cfg.filepath, "a");
+    if (f) {
+      log_fprint(stderr, &info);
+      vfprintf(stderr, fmt, args);
+      fprintf(stderr, "\n");
+      fclose(f);
+    } else {
+      fprintf(stderr, "Cannot open file %s\n", cfg.filepath);
+    }
+  }
+  if (cfg.wr_stderr) {
+    log_fprint(stderr, &info);
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+  }
   va_end(args);
 }
 

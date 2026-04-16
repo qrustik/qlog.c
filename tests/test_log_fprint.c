@@ -5,8 +5,9 @@
 
 START_TEST(test_log_fprint_basic) {
   FILE* f = fopen(DEFAULT_FILEPATH, "a+");
+  if (f == NULL) ck_abort_msg("Cannot open file %s", DEFAULT_FILEPATH);
   char res[MAX_BUF] = {0};
-  char* exp = " [INFO] test.c:10 main";
+  char* exp = " [INFO] test.c:10 main ";
   char exp_time[MAX_FMT] = {0};
   log_info info = {
       .filename = "test.c", .level = INFO, .funcname = "main", .line = "10"};

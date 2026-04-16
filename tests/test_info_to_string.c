@@ -2,7 +2,7 @@
 
 START_TEST(test_info_to_string) {
   char res[BUFSIZ] = {0};
-  char* exp = "[INFO] test.c:9 log_fprint";
+  char* exp = "[INFO] test.c:9 log_fprint ";
 
   load_default_cfg();
   log_info info = {.filename = "test.c",

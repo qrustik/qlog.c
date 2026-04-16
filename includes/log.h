@@ -22,7 +22,7 @@ typedef enum log_level {
 #define DEFAULT_CFG_PATH "qlog.config"
 #define CFG_PATH_ENV "LOG_CFG_PATH"
 
-#define DEFAULT_FORMAT "[%s] %s:%s %s\n"
+#define DEFAULT_FORMAT "[%s] %s:%s %s "
 #define DEFAULT_DATE_FORMAT "%H:%M:%S"
 #define DEFAULT_FILEPATH __DATE__ ".log"
 #define DEFAULT_ORDER ((int[4]){0, 1, 2, 3})
@@ -66,6 +66,8 @@ typedef struct log_config {
   log_level_t level;
   int is_load;
   int order[CNT_INFO_FIELDS];
+  int wr_file;
+  int wr_stderr;
 } log_cfg;
 
 void log_msg(log_info info, const char* fmt, ...);

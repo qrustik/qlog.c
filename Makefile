@@ -25,9 +25,11 @@ build_dir:
 
 $(TARGET): build_dir $(OBJS)
 	ar rsc $@ $(OBJS)
+	@echo "--- Created library in $@ ---"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compile $< into $@"
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 -include $(DEPS)
 
@@ -35,12 +37,13 @@ test: $(TARGET)
 	$(MAKE) -C tests
 
 run: test
-	./$(BIN_DIR)/test
+	@echo "--- Running tests ---"
+	@./$(BIN_DIR)/test
 
 debug:
 	CFLAGS += -g -O0
 debug: clean test
-	CK_FORK=no; lldb $(BIN_DIR)/test
+	@CK_FORK=no; lldb $(BIN_DIR)/test
 	@echo "--- builded with debug flags ---"
 	
 release: CFLAGS += -O3
