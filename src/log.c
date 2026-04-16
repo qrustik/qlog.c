@@ -143,6 +143,7 @@ void log_fprint(FILE* stream, const log_info* info) {
  * @return no return
  */
 void log_msg(log_info info, const char* fmt, ...) {
+  if (!atoi(GET_OR(getenv("LOG_ON"), "1"))) return;
   if (!cfg.is_load) {
     char* path = getenv(CFG_PATH_ENV);
     if (load_cfg(path) == EXIT_FAILURE) {

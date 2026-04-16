@@ -9,3 +9,4 @@ report/*
 build/*
 .clang-format
 bin/*
+*.log

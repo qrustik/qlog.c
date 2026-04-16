@@ -55,5 +55,5 @@ format:
 	clang-format -i */*.c */*.h --style=Google
 
 clean:
-	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/*
+	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/* $(TEST_DIR)/*.log
 	@echo "--- clean up complete ---"
