@@ -8,5 +8,6 @@
 Suite* suite_parse_format(void);
 Suite* suite_log_fprint(void);
 Suite* suite_load_default_cfg(void);
+Suite* suite_info_to_string(void);
 
 #endif  // TEST_H

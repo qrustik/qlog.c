@@ -12,6 +12,7 @@ typedef enum log_level {
   FATAL,
   OFF
 } log_level_t;
+
 // maximum length of format string
 #define MAX_FMT 64
 // maximum length of other strings like filepath
@@ -21,7 +22,7 @@ typedef enum log_level {
 #define DEFAULT_CFG_PATH "qlog.config"
 #define CFG_PATH_ENV "LOG_CFG_PATH"
 
-#define DEFAULT_FORMAT "[%s] %s:%s %s"
+#define DEFAULT_FORMAT "[%s] %s:%s %s\n"
 #define DEFAULT_DATE_FORMAT "%H:%M:%S"
 #define DEFAULT_FILEPATH __DATE__ ".log"
 #define DEFAULT_ORDER ((int[4]){0, 1, 2, 3})
@@ -70,8 +71,9 @@ typedef struct log_config {
 void log_msg(log_info info, const char* fmt, ...);
 
 // Remove from release version
+void log_fprint(FILE* stream, const log_info* info);
 void load_default_cfg();
-void log_sprint(char* str, const log_info* info, char* timestamp);
+int info_to_string(const log_info* info, char* str);
 void parse_format(const char* format);
 
 extern log_cfg cfg;

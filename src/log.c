@@ -1,7 +1,6 @@
 #include "log.h"
 
 #include <stdarg.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,10 +28,6 @@ static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
 
 // global configuration structure that initialized with first call LOG()
 log_cfg cfg = {0};
-
-static size_t offsets[] = {offsetof(log_info, filename),
-                           offsetof(log_info, funcname),
-                           offsetof(log_info, level), offsetof(log_info, line)};
 
 static int is_has_index(int array[CNT_INFO_FIELDS], int index);
 
@@ -107,8 +102,7 @@ int load_cfg(const char* path) {
 }
 
 // for debug
-void log_sprint(char* str, const log_info* info, char* timestamp) {
-  int written = sprintf(str, "%s ", timestamp);
+int info_to_string(const log_info* info, char* str) {
   const char* msg_info[CNT_INFO_FIELDS] = {0};
   for (size_t i = 0; i < CNT_INFO_FIELDS; i++) {
     if (cfg.order[i] == 0)
@@ -120,22 +114,18 @@ void log_sprint(char* str, const log_info* info, char* timestamp) {
     else if (cfg.order[i] == 3)
       msg_info[i] = info->funcname;
   }
-  sprintf(str + written, cfg.fmt, msg_info[0], msg_info[1], msg_info[2],
-          msg_info[3]);
+  return sprintf(str, cfg.fmt, msg_info[0], msg_info[1], msg_info[2],
+                 msg_info[3]);
 }
 
 void log_fprint(FILE* stream, const log_info* info) {
   char timestamp[MAX_BUF] = {0};
-  strftime(timestamp, MAX_BUF, cfg.date_fmt, localtime(NULL));
-  fprintf(stream, "%s", timestamp);
-  const char* msg_info[CNT_INFO_FIELDS];
-  for (size_t i = 0; i < CNT_INFO_FIELDS; i++) {
-    if (cfg.order[i] == 2)
-      msg_info[i] = LOG_LEVELS[info->level];
-    else
-      msg_info[i] = (char*)info + offsets[cfg.order[i]];
-  }
-  fprintf(stream, cfg.fmt, msg_info[0], msg_info[1], msg_info[2], msg_info[3]);
+  time_t t = time(NULL);
+  strftime(timestamp, MAX_BUF, cfg.date_fmt, localtime(&t));
+  fprintf(stream, "%s ", timestamp);
+  char str[MAX_BUF] = {0};
+  info_to_string(info, str);
+  fprintf(stream, "%s", str);
 }
 
 /**

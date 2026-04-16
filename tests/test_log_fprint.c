@@ -1,18 +1,27 @@
+#include <stdio.h>
+#include <time.h>
+
 #include "test.h"
 
 START_TEST(test_log_fprint_basic) {
-  char res[BUFSIZ] = {0};
-  char* timestamp = "00:12:53";
-  char* exp = "00:12:53 [INFO] test.c:9 log_fprint";
+  FILE* f = fopen(DEFAULT_FILEPATH, "a+");
+  char res[MAX_BUF] = {0};
+  char* exp = " [INFO] test.c:10 main";
+  char exp_time[MAX_FMT] = {0};
+  log_info info = {
+      .filename = "test.c", .level = INFO, .funcname = "main", .line = "10"};
 
   load_default_cfg();
-  log_info info = {.filename = "test.c",
-                   .funcname = "log_fprint",
-                   .level = INFO,
-                   .line = "9"};
-
-  log_sprint(res, &info, timestamp);
-  ck_assert_str_eq(res, exp);
+  long cur = ftell(f);
+  time_t t = time(NULL);
+  strftime(exp_time, MAX_FMT, cfg.date_fmt, localtime(&t));
+  log_fprint(f, &info);
+  fseek(f, cur, SEEK_SET);
+  if (fgets(res, MAX_BUF, f) == NULL) ck_abort_msg("fgets == NULL");
+  fclose(f);
+  remove(DEFAULT_FILEPATH);
+  strcat(exp_time, exp);
+  ck_assert_str_eq(res, exp_time);
 }
 END_TEST
 

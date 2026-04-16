@@ -37,7 +37,7 @@ test: $(TARGET)
 run: test
 	./$(BIN_DIR)/test
 
-debug: 
+debug:
 	CFLAGS += -g -O0
 debug: clean test
 	CK_FORK=no; lldb $(BIN_DIR)/test
