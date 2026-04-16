@@ -1,6 +1,7 @@
 #include "log.h"
 
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,33 +24,33 @@
     (_a == NULL) ? (b) : _a; \
   })
 
-// static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
-//                                    "WARNING", "ERROR", "FATAL"};
+static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
+                                   "WARNING", "ERROR", "FATAL"};
 
 // global configuration structure that initialized with first call LOG()
-// function
 log_cfg cfg = {0};
 
+static size_t offsets[] = {offsetof(log_info, filename),
+                           offsetof(log_info, funcname),
+                           offsetof(log_info, level), offsetof(log_info, line)};
+
 static int is_has_index(int array[CNT_INFO_FIELDS], int index);
-//
-static void init_cfg() { memset(cfg.order, -1, sizeof(cfg.order)); }
 
 /**
  * @brief Parses the format of the string from the file and sets the index of
  * the log info structure depending on it
  * specs:
- * p - file path
- * f - func name
  * l - log level
+ * p - file path
  * n - line number
+ * f - func name
  * @param format format string for parsing
  * @return no return
  */
 void parse_format(const char* format) {
   size_t index = 0;
-  char* specs = "pfln";
-  char* specs_fmt = "sssd";
-  init_cfg();
+  char* specs = "lpnf";
+  memset(cfg.order, -1, sizeof(cfg.order));
   char* fmt = cfg.fmt;
   for (size_t i = 0; *format;) {
     if (*format == '%' && i < CNT_INFO_FIELDS) {
@@ -57,7 +58,7 @@ void parse_format(const char* format) {
       index = strchr(specs, *format) - specs;
       if (index < CNT_INFO_FIELDS && !is_has_index(cfg.order, index)) {
         cfg.order[i++] = index;
-        *fmt++ = specs_fmt[index];
+        *fmt++ = 's';
       } else {
         *fmt++ = *format;
       }
@@ -105,10 +106,38 @@ int load_cfg(const char* path) {
   return EXIT_SUCCESS;
 }
 
-void log_fprint(FILE* stream, const log_info* info) {
-  (void)stream;
-  (void)info;
+// for debug
+void log_sprint(char* str, const log_info* info, char* timestamp) {
+  int written = sprintf(str, "%s ", timestamp);
+  const char* msg_info[CNT_INFO_FIELDS] = {0};
+  for (size_t i = 0; i < CNT_INFO_FIELDS; i++) {
+    if (cfg.order[i] == 0)
+      msg_info[i] = LOG_LEVELS[info->level];
+    else if (cfg.order[i] == 1)
+      msg_info[i] = info->filename;
+    else if (cfg.order[i] == 2)
+      msg_info[i] = info->line;
+    else if (cfg.order[i] == 3)
+      msg_info[i] = info->funcname;
+  }
+  sprintf(str + written, cfg.fmt, msg_info[0], msg_info[1], msg_info[2],
+          msg_info[3]);
 }
+
+void log_fprint(FILE* stream, const log_info* info) {
+  char timestamp[MAX_BUF] = {0};
+  strftime(timestamp, MAX_BUF, cfg.date_fmt, localtime(NULL));
+  fprintf(stream, "%s", timestamp);
+  const char* msg_info[CNT_INFO_FIELDS];
+  for (size_t i = 0; i < CNT_INFO_FIELDS; i++) {
+    if (cfg.order[i] == 2)
+      msg_info[i] = LOG_LEVELS[info->level];
+    else
+      msg_info[i] = (char*)info + offsets[cfg.order[i]];
+  }
+  fprintf(stream, cfg.fmt, msg_info[0], msg_info[1], msg_info[2], msg_info[3]);
+}
+
 /**
  * @brief Print log message if calling first time initialized cfg global
  * structure
@@ -132,7 +161,8 @@ void log_msg(log_info info, const char* fmt, ...) {
   va_end(args);
 }
 
-void load_default_cfg() {
+// Fills the fields of the structure with default values
+void load_default_cfg(void) {
   fprintf(stderr, "Loading default configuration for logger\n");
   strcpy(cfg.fmt, DEFAULT_FORMAT);
   strcpy(cfg.date_fmt, DEFAULT_DATE_FORMAT);

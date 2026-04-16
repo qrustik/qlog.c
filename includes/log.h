@@ -1,6 +1,8 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <stdio.h>
+
 typedef enum log_level {
   TRACE,
   DEBUG,
@@ -19,11 +21,13 @@ typedef enum log_level {
 #define DEFAULT_CFG_PATH "qlog.config"
 #define CFG_PATH_ENV "LOG_CFG_PATH"
 
-#define DEFAULT_FORMAT "[%s]\t%s:%d\t%s\n"
+#define DEFAULT_FORMAT "[%s] %s:%s %s"
 #define DEFAULT_DATE_FORMAT "%H:%M:%S"
 #define DEFAULT_FILEPATH __DATE__ ".log"
-#define DEFAULT_ORDER ((int[4]){2, 0, 3, 1})
+#define DEFAULT_ORDER ((int[4]){0, 1, 2, 3})
 #define DEFAULT_LEVEL INFO
+
+#define STR(a) #a
 
 // print log with TRACE level
 #define LOGT(fmt, ...) LOG(TRACE, fmt, __VA_ARGS__)
@@ -38,19 +42,19 @@ typedef enum log_level {
 // print log with FATAL level
 #define LOGF(fmt, ...) LOG(FATAL, fmt, __VA_ARGS__)
 
-#define LOG(LEVEL, fmt, ...)               \
-  log_msg((log_info){.filename = __FILE__, \
-                     .funcname = __func__, \
-                     .level = LEVEL,       \
-                     .line = __LINE__},    \
+#define LOG(LEVEL, fmt, ...)                 \
+  log_msg((log_info){.filename = __FILE__,   \
+                     .funcname = __func__,   \
+                     .level = LEVEL,         \
+                     .line = STR(__LINE__)}, \
           fmt, __VA_ARGS__)
 
 // Contains meta info about running programm
 typedef struct log_info {
-  const char* filename;
-  const char* funcname;
   log_level_t level;
-  int line;
+  const char* filename;
+  const char* line;
+  const char* funcname;
 } log_info;
 
 // Contains logger options for output log info
@@ -65,9 +69,9 @@ typedef struct log_config {
 
 void log_msg(log_info info, const char* fmt, ...);
 
-void load_default_cfg();
-
 // Remove from release version
+void load_default_cfg();
+void log_sprint(char* str, const log_info* info, char* timestamp);
 void parse_format(const char* format);
 
 extern log_cfg cfg;

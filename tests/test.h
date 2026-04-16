@@ -6,6 +6,7 @@
 #include "log.h"
 
 Suite* suite_parse_format(void);
+Suite* suite_log_fprint(void);
 Suite* suite_load_default_cfg(void);
 
 #endif  // TEST_H
