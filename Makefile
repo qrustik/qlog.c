@@ -29,7 +29,7 @@ $(TARGET): build_dir $(OBJS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "Compile $< into $@"
-	@$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 -include $(DEPS)
 
@@ -40,8 +40,7 @@ run: test
 	@echo "--- Running tests ---"
 	@./$(BIN_DIR)/test
 
-debug:
-	CFLAGS += -g -O0
+debug: CFLAGS += -g -O0
 debug: clean test
 	@CK_FORK=no; lldb $(BIN_DIR)/test
 	@echo "--- builded with debug flags ---"

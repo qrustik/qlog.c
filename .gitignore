@@ -10,3 +10,4 @@ build/*
 .clang-format
 bin/*
 *.log
+*.config

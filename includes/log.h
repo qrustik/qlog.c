@@ -10,7 +10,8 @@ typedef enum log_level {
   WARNING,
   ERROR,
   FATAL,
-  OFF
+  OFF,
+  LEVELS_COUNT
 } log_level_t;
 
 // maximum length of format string
@@ -78,6 +79,7 @@ void log_fprint(FILE* stream, const log_info* info);
 void load_default_cfg();
 int info_to_string(const log_info* info, char* str);
 void parse_format(const char* format);
+int load_cfg(const char* path);
 
 extern log_cfg cfg;
 

@@ -28,6 +28,7 @@ static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
 
 // global configuration structure that initialized with first call LOG()
 log_cfg cfg = {0};
+static int LOG_ON = 1;
 
 static int is_has_index(int array[CNT_INFO_FIELDS], int index);
 
@@ -93,9 +94,32 @@ int load_cfg(const char* path) {
     if (buf[0] == '\n' || buf[0] == '#') continue;
     const char* pos = strstr(buf, "fmt");
     if (pos) {
-      pos += strlen("fmt");
+      pos += strlen("fmt") + 1;
       parse_format(pos);
     }
+    pos = strstr(buf, "date_fmt");
+    if (pos) {
+      pos += strlen("date_fmt") + 1;
+      strncpy(cfg.date_fmt, pos, MAX_FMT);
+      cfg.date_fmt[strcspn(cfg.date_fmt, "\n")] = '\0';
+    }
+    pos = strstr(buf, "filepath");
+    if (pos) {
+      pos += strlen("filepath");
+      strncpy(cfg.filepath, pos, MAX_BUF);
+      cfg.filepath[strcspn(cfg.date_fmt, "\n")] = '\0';
+    }
+    pos = strstr(buf, "level");
+    if (pos) {
+      pos += strlen("level");
+      for (size_t i = 0; i < LEVELS_COUNT; i++) {
+        if (strncmp(LOG_LEVELS[i], pos, strlen(LOG_LEVELS[i])) == 0) {
+          cfg.level = i;
+          break;
+        }
+      }
+    }
+    pos = strstr(buf, "");
   }
   fclose(f);
   return EXIT_SUCCESS;
@@ -143,13 +167,16 @@ void log_fprint(FILE* stream, const log_info* info) {
  * @return no return
  */
 void log_msg(log_info info, const char* fmt, ...) {
-  if (!atoi(GET_OR(getenv("LOG_ON"), "1"))) return;
+  if (!LOG_ON) return;
   if (!cfg.is_load) {
+    LOG_ON = atoi(GET_OR(getenv("LOG_ON"), "1"));
+    if (!LOG_ON) return;
     char* path = getenv(CFG_PATH_ENV);
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();
     }
 
+    strcpy(cfg.filepath, GET_OR(getenv("FILEPATH"), DEFAULT_FILEPATH));
     cfg.wr_file = atoi(GET_OR(getenv("WRITE_FILE"), "0"));
     cfg.wr_stderr = atoi(GET_OR(getenv("WRITE_STDERR"), "1"));
   }
