@@ -77,6 +77,42 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
   return ret;
 }
 
+void parse_config_file(FILE* stream) {
+  char buf[MAX_BUF] = {0};
+  while (fgets(buf, MAX_BUF, stream) != NULL) {
+    if (buf[0] == "#" || buf[0] == ";") continue;
+    char* token = strtok(buf, " =");
+#define MATCH(a, b) (strcmp(a, b) == 0)
+    do {
+      if (MATCH(token, "FMT")) {
+        token = strtok(NULL, " \"");
+        strcpy(cfg.fmt, token);
+      } else if (MATCH(token, "DATE_FMT")) {
+        token = strtok(NULL, " \"");
+        strcpy(cfg.date_fmt, token);
+      } else if (MATCH(token, "FILEPATH")) {
+        token = strtok(NULL, " \"");
+        strcpy(cfg.filepath, token);
+      } else if (MATCH(token, "WR_STDERR")) {
+        token = strtok(NULL, " \"");
+        cfg.wr_stderr = atoi(token) ? 1 : 0;
+      } else if (MATCH(token, "WR_FILE")) {
+        token = strtok(NULL, " \"");
+        cfg.wr_file = atoi(token) ? 1 : 0;
+      } else if (MATCH(token, "LEVEL")) {
+        token = strtok(NULL, " \"");
+        int level = atoi(token);
+        if (level < LEVELS_COUNT && level > 0) {
+          cfg.level = level;
+        } else {
+          cfg.level = DEFAULT_LEVEL;
+          fprintf(stderr, "INCORRECT LEVEL VALUE FROM CONFIG FILE");
+        }
+      }
+    } while ((token = strtok(NULL, "=")) != NULL);
+  }
+}
+
 /**
  * @brief Open and read config file
  * @param path path of config file if path is NULL open DEFAULT_PATH
@@ -88,38 +124,6 @@ int load_cfg(const char* path) {
     fprintf(stderr, "Failed open file with name: %s\n",
             GET_OR(path, DEFAULT_CFG_PATH));
     return EXIT_FAILURE;
-  }
-  char buf[MAX_BUF] = {0};
-  while (fgets(buf, MAX_BUF, f)) {
-    if (buf[0] == '\n' || buf[0] == '#') continue;
-    const char* pos = strstr(buf, "fmt");
-    if (pos) {
-      pos += strlen("fmt") + 1;
-      parse_format(pos);
-    }
-    pos = strstr(buf, "date_fmt");
-    if (pos) {
-      pos += strlen("date_fmt") + 1;
-      strncpy(cfg.date_fmt, pos, MAX_FMT);
-      cfg.date_fmt[strcspn(cfg.date_fmt, "\n")] = '\0';
-    }
-    pos = strstr(buf, "filepath");
-    if (pos) {
-      pos += strlen("filepath");
-      strncpy(cfg.filepath, pos, MAX_BUF);
-      cfg.filepath[strcspn(cfg.date_fmt, "\n")] = '\0';
-    }
-    pos = strstr(buf, "level");
-    if (pos) {
-      pos += strlen("level");
-      for (size_t i = 0; i < LEVELS_COUNT; i++) {
-        if (strncmp(LOG_LEVELS[i], pos, strlen(LOG_LEVELS[i])) == 0) {
-          cfg.level = i;
-          break;
-        }
-      }
-    }
-    pos = strstr(buf, "");
   }
   fclose(f);
   return EXIT_SUCCESS;
@@ -175,10 +179,6 @@ void log_msg(log_info info, const char* fmt, ...) {
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();
     }
-
-    strcpy(cfg.filepath, GET_OR(getenv("FILEPATH"), DEFAULT_FILEPATH));
-    cfg.wr_file = atoi(GET_OR(getenv("WRITE_FILE"), "0"));
-    cfg.wr_stderr = atoi(GET_OR(getenv("WRITE_STDERR"), "1"));
   }
   if (info.level < cfg.level) return;
   va_list args;
