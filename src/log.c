@@ -77,6 +77,10 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
   return ret;
 }
 
+/**
+ * @brief parse config file to log config structure
+ * @param stream of open file
+ */
 void parse_config_file(FILE* stream) {
   char buf[MAX_BUF] = {0};
   while (fgets(buf, MAX_BUF, stream) != NULL) {
@@ -109,7 +113,8 @@ void parse_config_file(FILE* stream) {
           fprintf(stderr, "INCORRECT LEVEL VALUE FROM CONFIG FILE");
         }
       }
-    } while ((token = strtok(NULL, "=")) != NULL);
+    } while ((token = strtok(NULL, " =")) != NULL);
+#undef MATCH
   }
 }
 
