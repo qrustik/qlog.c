@@ -77,6 +77,14 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
   return ret;
 }
 
+log_level_t str_to_lvl(const char* str) {
+  log_level_t index = 0;
+  for (; index < LEVELS_COUNT; index++) {
+    if (strcmp(LOG_LEVELS[index], str) == 0) return index;
+  }
+  return index;
+}
+
 /**
  * @brief parse config file to log config structure
  * @param stream of open file
@@ -84,28 +92,28 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
 void parse_config_file(FILE* stream) {
   char buf[MAX_BUF] = {0};
   while (fgets(buf, MAX_BUF, stream) != NULL) {
-    if (buf[0] == "#" || buf[0] == ";") continue;
+    if (buf[0] == '#' || buf[0] == ';') continue;
     char* token = strtok(buf, " =");
 #define MATCH(a, b) (strcmp(a, b) == 0)
     do {
       if (MATCH(token, "FMT")) {
-        token = strtok(NULL, " \"");
+        token = strtok(NULL, "\"");
         strcpy(cfg.fmt, token);
       } else if (MATCH(token, "DATE_FMT")) {
-        token = strtok(NULL, " \"");
+        token = strtok(NULL, "\"");
         strcpy(cfg.date_fmt, token);
       } else if (MATCH(token, "FILEPATH")) {
-        token = strtok(NULL, " \"");
+        token = strtok(NULL, "\"");
         strcpy(cfg.filepath, token);
       } else if (MATCH(token, "WR_STDERR")) {
-        token = strtok(NULL, " \"");
+        token = strtok(NULL, "\"");
         cfg.wr_stderr = atoi(token) ? 1 : 0;
       } else if (MATCH(token, "WR_FILE")) {
-        token = strtok(NULL, " \"");
+        token = strtok(NULL, "\"");
         cfg.wr_file = atoi(token) ? 1 : 0;
       } else if (MATCH(token, "LEVEL")) {
-        token = strtok(NULL, " \"");
-        int level = atoi(token);
+        token = strtok(NULL, "\"");
+        int level = str_to_lvl(token);
         if (level < LEVELS_COUNT && level > 0) {
           cfg.level = level;
         } else {
