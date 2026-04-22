@@ -6,12 +6,10 @@ START_TEST(test_log_msg_basic) {
   FILE* f = freopen(DEFAULT_FILEPATH, "a+", stderr);
   if (f == NULL) ck_abort_msg("Cannot open file %s", DEFAULT_FILEPATH);
   char res[MAX_BUF] = {0};
-  char exp[MAX_BUF] =
-      "Failed open file with name: qlog.config\n"
-      "Loading default configuration for logger\n";
+  char exp[MAX_BUF] = "";
   char* infostr =
-      " [INFO] test.c:9 main "
-      "message from test\n";
+      " _INFO_ [main] test.c:9"
+      "\n\tmessage from test\n";
   char exp_time[MAX_FMT] = {0};
   log_info info = {
       .filename = "test.c", .funcname = "main", .level = INFO, .line = "9"};

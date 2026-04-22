@@ -28,7 +28,6 @@ static const char* LOG_LEVELS[] = {"TRACE",   "DEBUG", "INFO",
 
 // global configuration structure that initialized with first call LOG()
 log_cfg cfg = {0};
-static int LOG_ON = 1;
 
 static int is_has_index(int array[CNT_INFO_FIELDS], int index);
 
@@ -209,16 +208,16 @@ void log_fprint(FILE* stream, const log_info* info) {
  * @return no return
  */
 void log_msg(log_info info, const char* fmt, ...) {
-  if (!LOG_ON) return;
   if (!cfg.is_load) {
-    LOG_ON = atoi(GET_OR(getenv("LOG_ON"), "1"));
-    if (!LOG_ON) return;
+    cfg.log_on = atoi(GET_OR(getenv("LOG_ON"), "1"));
+    if (!cfg.log_on) return;
     char* path = getenv(CFG_PATH_ENV);
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();
     }
     cfg.is_load = 1;
   }
+  if (!cfg.log_on) return;
   if (info.level < cfg.level) return;
   va_list args;
   va_start(args, fmt);
@@ -247,8 +246,9 @@ void load_default_cfg(void) {
   strcpy(cfg.fmt, DEFAULT_FORMAT);
   strcpy(cfg.date_fmt, DEFAULT_DATE_FORMAT);
   cfg.level = INFO;
-  memcpy(cfg.order, DEFAULT_ORDER, sizeof(cfg.order));
+  memmove(cfg.order, DEFAULT_ORDER, sizeof(cfg.order));
   strcpy(cfg.filepath, DEFAULT_FILEPATH);
   cfg.wr_file = 0;
   cfg.wr_stderr = 1;
+  cfg.log_on = 1;
 }

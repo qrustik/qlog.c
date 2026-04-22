@@ -70,6 +70,7 @@ typedef struct log_config {
   int order[CNT_INFO_FIELDS];
   int wr_file;
   int wr_stderr;
+  int log_on;
 } log_cfg;
 
 void log_msg(log_info info, const char* fmt, ...);
