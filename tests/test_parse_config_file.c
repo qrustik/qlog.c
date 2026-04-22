@@ -15,7 +15,7 @@ START_TEST(test_parse_config_file_basic) {
                  .filepath = "test.log",
                  .fmt = "_%s_ [%s] %s:%s\n\t",
                  .level = DEBUG,
-                 .wr_file = 1,
+                 .wr_file = 0,
                  .wr_stderr = 1};
   FILE* f = fopen("qlog.config", "rb");
   if (!f) ck_abort_msg("filestream is NULL");
@@ -27,6 +27,7 @@ START_TEST(test_parse_config_file_basic) {
   ck_assert_int_eq(exp.level, cfg.level);
   ck_assert_int_eq(exp.wr_file, cfg.wr_file);
   ck_assert_int_eq(exp.wr_stderr, cfg.wr_stderr);
+  remove("test.log");
 }
 END_TEST
 

@@ -29,8 +29,8 @@ typedef enum log_level {
 #define DEFAULT_ORDER ((int[4]){0, 1, 2, 3})
 #define DEFAULT_LEVEL INFO
 
-#define TOSTR(a) STR(a)
-#define STR(a) #a
+#define LOG_TOSTR(a) LOG_STR(a)
+#define LOG_STR(a) #a
 
 // print log with TRACE level
 #define LOGT(fmt, ...) LOG(TRACE, fmt, ##__VA_ARGS__)
@@ -45,11 +45,11 @@ typedef enum log_level {
 // print log with FATAL level
 #define LOGF(fmt, ...) LOG(FATAL, fmt, ##__VA_ARGS__)
 
-#define LOG(LEVEL, fmt, ...)                   \
-  log_msg((log_info){.filename = __FILE__,     \
-                     .funcname = __func__,     \
-                     .level = LEVEL,           \
-                     .line = TOSTR(__LINE__)}, \
+#define LOG(LEVEL, fmt, ...)                       \
+  log_msg((log_info){.filename = __FILE__,         \
+                     .funcname = __func__,         \
+                     .level = LEVEL,               \
+                     .line = LOG_TOSTR(__LINE__)}, \
           fmt, ##__VA_ARGS__)
 
 // Contains meta info about running programm
