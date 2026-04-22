@@ -13,11 +13,11 @@ FILEPATH="test.log"
 START_TEST(test_parse_config_file_basic) {
   log_cfg exp = {.date_fmt = "[%H:%M:%S]",
                  .filepath = "test.log",
-                 .fmt = "_%l_ [%f] %p:%n\n\t",
+                 .fmt = "_%s_ [%s] %s:%s\n\t",
                  .level = DEBUG,
                  .wr_file = 1,
                  .wr_stderr = 1};
-  FILE* f = fopen("qlog.config", "r");
+  FILE* f = fopen("qlog.config", "rb");
   if (!f) ck_abort_msg("filestream is NULL");
   parse_config_file(f);
 

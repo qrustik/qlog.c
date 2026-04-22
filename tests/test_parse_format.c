@@ -8,7 +8,7 @@ START_TEST(test_parse_format_basic) {
   ck_assert_str_eq(cfg.fmt, exp_fmt);
 }
 END_TEST
-// "pfln" p = 0 f = 1 l = 2 n = 3
+// "pfln" l = 0 p = 1 n = 2 f = 3
 START_TEST(test_parse_format_order) {
   char* fmt = "[%l] %p:%n %f";
   int exp_order[] = {0, 1, 2, 3};

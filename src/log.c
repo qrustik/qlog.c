@@ -32,20 +32,41 @@ static int LOG_ON = 1;
 
 static int is_has_index(int array[CNT_INFO_FIELDS], int index);
 
+// convert unescape sequence to escape sequence in dest string
+static void unescape_string(char* dest, const char* str) {
+  const char* sequence = "ntrvf0\\\"\'\0";
+  const char* replace = "\n\t\r\v\b\f\0\\\"\'";
+  size_t len_seq = strlen(sequence);
+  size_t index = 0;
+  while (*str) {
+    if (*str == '\\') {
+      str++;
+      index = strchr(sequence, *str) - sequence;
+      if (index < len_seq) {
+        if (sequence[index] == '\0')
+          str--;
+        else
+          *dest++ = replace[index];
+      } else {
+        *dest++ = *str;
+      }
+    } else {
+      *dest++ = *str;
+    }
+    str++;
+  }
+}
+
 /**
- * @brief Parses the format of the string from the file and sets the index of
- * the log info structure depending on it
- * specs:
- * l - log level
- * p - file path
- * n - line number
- * f - func name
+ * @brief Parses the format of the string from the file and sets the index
+ * of the log info structure depending on it specs: l - log level p - file
+ * path n - line number f - func name
  * @param format format string for parsing
  * @return no return
  */
 void parse_format(const char* format) {
   size_t index = 0;
-  char* specs = "lpnf";
+  const char* specs = "lpnf";
   memset(cfg.order, -1, sizeof(cfg.order));
   char* fmt = cfg.fmt;
   for (size_t i = 0; *format;) {
@@ -77,6 +98,7 @@ static int is_has_index(int array[CNT_INFO_FIELDS], int index) {
   return ret;
 }
 
+// convert string to log_level_t
 log_level_t str_to_lvl(const char* str) {
   log_level_t index = 0;
   for (; index < LEVELS_COUNT; index++) {
@@ -98,7 +120,9 @@ void parse_config_file(FILE* stream) {
     do {
       if (MATCH(token, "FMT")) {
         token = strtok(NULL, "\"");
-        strcpy(cfg.fmt, token);
+        char format[MAX_FMT] = {0};
+        unescape_string(format, token);
+        parse_format(format);
       } else if (MATCH(token, "DATE_FMT")) {
         token = strtok(NULL, "\"");
         strcpy(cfg.date_fmt, token);
@@ -121,7 +145,7 @@ void parse_config_file(FILE* stream) {
           fprintf(stderr, "INCORRECT LEVEL VALUE FROM CONFIG FILE");
         }
       }
-    } while ((token = strtok(NULL, " =")) != NULL);
+    } while ((token = strtok(NULL, " =\n")) != NULL);
 #undef MATCH
   }
 }
@@ -132,12 +156,13 @@ void parse_config_file(FILE* stream) {
  * @return status code if 0 - success, 1 - something went wrong
  */
 int load_cfg(const char* path) {
-  FILE* f = fopen(GET_OR(path, DEFAULT_CFG_PATH), "r");
+  FILE* f = fopen(GET_OR(path, DEFAULT_CFG_PATH), "rb");
   if (f == NULL) {
     fprintf(stderr, "Failed open file with name: %s\n",
             GET_OR(path, DEFAULT_CFG_PATH));
     return EXIT_FAILURE;
   }
+  parse_config_file(f);
   fclose(f);
   return EXIT_SUCCESS;
 }
@@ -192,6 +217,7 @@ void log_msg(log_info info, const char* fmt, ...) {
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();
     }
+    cfg.is_load = 1;
   }
   if (info.level < cfg.level) return;
   va_list args;
@@ -223,5 +249,6 @@ void load_default_cfg(void) {
   cfg.level = INFO;
   memcpy(cfg.order, DEFAULT_ORDER, sizeof(cfg.order));
   strcpy(cfg.filepath, DEFAULT_FILEPATH);
-  cfg.is_load = 1;
+  cfg.wr_file = 0;
+  cfg.wr_stderr = 1;
 }

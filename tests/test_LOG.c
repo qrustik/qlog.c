@@ -11,7 +11,7 @@ START_TEST(test_LOG_BASIC) {
   fread(res, sizeof(char), length, f);
   fclose(f);
   remove(DEFAULT_FILEPATH);
-  ck_assert(res);
+  ck_abort_msg(res);
 }
 END_TEST
 

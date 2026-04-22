@@ -14,7 +14,7 @@ DEPS:= $(OBJS:.o=.d)
 
 export TARGET:= $(BIN_DIR)/qlog.a
 
-.phony: all clean debug test build_dir debug release format
+.phony: all clean debug test build_dir debug release format clear
 
 all: $(TARGET)
 
@@ -53,6 +53,7 @@ release: clean all
 format:
 	clang-format -i */*.c */*.h --style=Google
 
+clear: clean
 clean:
 	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/* $(TEST_DIR)/*.log
 	@echo "--- clean up complete ---"
