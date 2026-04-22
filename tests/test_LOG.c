@@ -10,6 +10,7 @@ START_TEST(test_LOG_BASIC) {
   fseek(f, start, SEEK_SET);
   fread(res, sizeof(char), length, f);
   fclose(f);
+  remove(DEFAULT_FILEPATH);
   ck_abort_msg(res);
 }
 END_TEST

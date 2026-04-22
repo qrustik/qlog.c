@@ -152,7 +152,6 @@ int info_to_string(const log_info* info, char* str) {
                  msg_info[3]);
 }
 
-
 void log_fprint(FILE* stream, const log_info* info) {
   char timestamp[MAX_BUF] = {0};
   time_t t = time(NULL);
