@@ -1,6 +1,13 @@
 #ifndef LOG_H
 #define LOG_H
 
+/**
+ * @file log.h
+ * @author qrustik
+ * @brief Interface header for qlog.c
+ * @date 2026-04-22
+ */
+
 // levels of log msg
 typedef enum log_level {
   TRACE,

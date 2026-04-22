@@ -1,6 +1,13 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+/**
+ * @file helpers.h
+ * @author qrustik
+ * @brief help functions for log.c
+ * @date 2026-04-22
+ */
+
 #include <stdio.h>
 
 #include "log.h"
