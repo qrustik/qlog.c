@@ -1,8 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdio.h>
-
+// levels of log msg
 typedef enum log_level {
   TRACE,
   DEBUG,
@@ -14,20 +13,8 @@ typedef enum log_level {
   LEVELS_COUNT
 } log_level_t;
 
-// maximum length of format string
-#define MAX_FMT 64
-// maximum length of other strings like filepath
-#define MAX_BUF 256
-#define CNT_INFO_FIELDS 4
-
-#define DEFAULT_CFG_PATH "qlog.config"
-#define CFG_PATH_ENV "LOG_CFG_PATH"
-
-#define DEFAULT_FORMAT "[%s] %s:%s %s "
-#define DEFAULT_DATE_FORMAT "%H:%M:%S"
-#define DEFAULT_FILEPATH __DATE__ ".log"
-#define DEFAULT_ORDER ((int[4]){0, 1, 2, 3})
-#define DEFAULT_LEVEL INFO
+// constant array sizes for config log variables
+enum log_array_sizes { MAX_FMT = 64, MAX_BUF = 256, CNT_INFO_FIELDS = 4 };
 
 #define LOG_TOSTR(a) LOG_STR(a)
 #define LOG_STR(a) #a
@@ -45,6 +32,7 @@ typedef enum log_level {
 // print log with FATAL level
 #define LOGF(fmt, ...) LOG(FATAL, fmt, ##__VA_ARGS__)
 
+// print log with meta info
 #define LOG(LEVEL, fmt, ...)                       \
   log_msg((log_info){.filename = __FILE__,         \
                      .funcname = __func__,         \
@@ -73,15 +61,17 @@ typedef struct log_config {
   int log_on;
 } log_cfg;
 
+/**
+ * @brief Print log message if calling first time initialized cfg global
+ * structure
+ * @param info that parameter contains meta-info of run-time
+ * LEVEL-TIME-FILENAME-LINE-FUNCTION
+ * @param fmt format string for log message
+ * @return no return
+ */
 void log_msg(log_info info, const char* fmt, ...);
 
-// Remove from release version
-void log_fprint(FILE* stream, const log_info* info);
-void load_default_cfg();
-int info_to_string(const log_info* info, char* str);
-void parse_format(const char* format);
-int load_cfg(const char* path);
-
+// global configuration structure that initialized with first call LOG()
 extern log_cfg cfg;
 
 #endif  // LOG_H

@@ -2,8 +2,11 @@
 #define TEST_H
 
 #include <check.h>
+#include <stdio.h>
 
+#include "helpers.h"
 #include "log.h"
+#include "macro.h"
 
 Suite* suite_parse_format(void);
 Suite* suite_log_fprint(void);
