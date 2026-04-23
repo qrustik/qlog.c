@@ -73,4 +73,6 @@ int info_to_string(const log_info* info, char* str);
  */
 void log_fprint(FILE* stream, const log_info* info);
 
+void load_environ_cfg(void);
+
 #endif  // HELPERS_H

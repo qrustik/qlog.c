@@ -1,5 +1,6 @@
 #include "helpers.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -90,27 +91,28 @@ void parse_config_file(FILE* stream) {
   while (fgets(buf, MAX_BUF, stream) != NULL) {
     if (buf[0] == '#' || buf[0] == ';') continue;
     char* token = strtok(buf, " =");
+    const char* delim = "\"\n";
 #define MATCH(a, b) (strcmp(a, b) == 0)
     do {
       if (MATCH(token, "FMT")) {
-        token = strtok(NULL, "\"");
+        token = strtok(NULL, delim);
         char format[MAX_FMT] = {0};
         unescape_string(format, token);
         parse_format(format);
       } else if (MATCH(token, "DATE_FMT")) {
-        token = strtok(NULL, "\"");
+        token = strtok(NULL, delim);
         strcpy(cfg.date_fmt, token);
       } else if (MATCH(token, "FILEPATH")) {
-        token = strtok(NULL, "\"");
+        token = strtok(NULL, delim);
         strcpy(cfg.filepath, token);
       } else if (MATCH(token, "WR_STDERR")) {
-        token = strtok(NULL, "\"");
-        cfg.wr_stderr = strcmp("1", token) == 0;
+        token = strtok(NULL, delim);
+        cfg.wr_stderr = MATCH(token, "1");
       } else if (MATCH(token, "WR_FILE")) {
-        token = strtok(NULL, "\"");
-        cfg.wr_file = strcmp("1", token) == 0;
+        token = strtok(NULL, delim);
+        cfg.wr_file = MATCH(token, "1");
       } else if (MATCH(token, "LEVEL")) {
-        token = strtok(NULL, "\"");
+        token = strtok(NULL, delim);
         int level = str_to_lvl(token);
         if (level < LEVELS_COUNT && level > 0) {
           cfg.level = level;
@@ -118,6 +120,9 @@ void parse_config_file(FILE* stream) {
           cfg.level = DEFAULT_LEVEL;
           fprintf(stderr, "INCORRECT LEVEL VALUE FROM CONFIG FILE");
         }
+      } else if (MATCH(token, "LOG_ON")) {
+        token = strtok(NULL, delim);
+        cfg.log_on = MATCH(token, "1");
       }
     } while ((token = strtok(NULL, " =\n")) != NULL);
 #undef MATCH
@@ -160,4 +165,58 @@ void log_fprint(FILE* stream, const log_info* info) {
   char str[MAX_BUF] = {0};
   info_to_string(info, str);
   fprintf(stream, "%s", str);
+}
+
+void load_environ_cfg(void) {
+  enum env_name {
+    DATE_FMT,
+    FMT,
+    FILEPATH,
+    WR_STDERR,
+    WR_FILE,
+    LOG_ON,
+    LEVEL,
+    CNT_ENV
+  };
+  const char* env[] = {"DATE_FMT", "FMT",    "FILEPATH", "WR_STDERR",
+                       "WR_FILE",  "LOG_ON", "LEVEL"};
+  char* val = NULL;
+  for (size_t i = 0; i < CNT_ENV; i++) {
+    if ((val = getenv(env[i])) != NULL) {
+      switch (i) {
+        case FMT: {
+          char format[MAX_FMT] = {0};
+          unescape_string(format, val);
+          parse_format(format);
+        } break;
+        case DATE_FMT: {
+          strcpy(cfg.date_fmt, val);
+        } break;
+        case FILEPATH: {
+          strcpy(cfg.filepath, val);
+        } break;
+        case LEVEL: {
+          log_level_t lvl = str_to_lvl(val);
+          if (lvl < LEVELS_COUNT && lvl > 0)
+            cfg.level = lvl;
+          else
+            fprintf(stderr, "INCORRECT LEVEL VALUE FROM ENVIRON: %s", val);
+        } break;
+#define MATCH(a, b) (strcmp(a, b) == 0)
+        case WR_FILE: {
+          cfg.wr_file = MATCH(val, "1");
+        } break;
+        case WR_STDERR: {
+          cfg.wr_stderr = MATCH(val, "1");
+        } break;
+        case LOG_ON: {
+          cfg.log_on = MATCH(val, "1");
+        } break;
+#undef MATCH
+        default:
+          fprintf(stderr, "OUT OF BOUND IN ENV");
+          break;
+      }
+    }
+  }
 }

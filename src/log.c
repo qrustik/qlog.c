@@ -9,8 +9,8 @@
 
 /*
     ХОТЕЛКИ ОТ ЛОГЕРА:
-    -настраивается формат вывода
-    -настраивается формат времени
+    -настраивается формат вывода ✅
+    -настраивается формат времени ✅
     -возможность настройки как внутри так и извне
     -как можно меньше оверхеда
     -кросс-платформ
@@ -21,12 +21,12 @@ log_cfg cfg = {0};
 
 void log_msg(log_info info, const char* fmt, ...) {
   if (!cfg.is_load) {
-    cfg.log_on = atoi(GET_OR(getenv("LOG_ON"), "1"));
     if (!cfg.log_on) return;
     char* path = getenv(CFG_PATH_ENV);
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();
     }
+    load_environ_cfg();
     cfg.is_load = 1;
   }
   if (!cfg.log_on) return;
