@@ -21,7 +21,6 @@ log_cfg cfg = {0};
 
 void log_msg(log_info info, const char* fmt, ...) {
   if (!cfg.is_load) {
-    if (!cfg.log_on) return;
     char* path = getenv(CFG_PATH_ENV);
     if (load_cfg(path) == EXIT_FAILURE) {
       load_default_cfg();

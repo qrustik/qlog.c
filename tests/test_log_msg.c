@@ -3,7 +3,8 @@
 #include "test.h"
 
 START_TEST(test_log_msg_basic) {
-  FILE* f = freopen(DEFAULT_FILEPATH, "w", stderr);
+  memset(&cfg, 0, sizeof(cfg));
+  FILE* f = freopen(DEFAULT_FILEPATH, "a+", stderr);
   if (f == NULL) ck_abort_msg("Cannot open file %s", DEFAULT_FILEPATH);
   char res[MAX_BUF] = {0};
   char exp[MAX_BUF] = "";

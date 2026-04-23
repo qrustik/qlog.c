@@ -1,6 +1,7 @@
 #include "test.h"
 
 START_TEST(test_LOG_BASIC) {
+  memset(&cfg, 0, sizeof(cfg));
   FILE* f = freopen(DEFAULT_FILEPATH, "a+", stderr);
   if (!f) ck_abort_msg("CANNOT OPEN FILE %s", DEFAULT_FILEPATH);
   char res[MAX_BUF] = {0};
@@ -11,6 +12,9 @@ START_TEST(test_LOG_BASIC) {
   fread(res, sizeof(char), length, f);
   fclose(f);
   remove(DEFAULT_FILEPATH);
+  f = freopen("hello.log", "a", stderr);
+  LOGI("HELLO LOG\n");
+  fclose(f);
   ck_abort_msg(res);
 }
 END_TEST
