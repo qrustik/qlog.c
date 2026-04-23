@@ -1,6 +1,7 @@
 #include "test.h"
 
 START_TEST(test_load_cfg_basic) {
+  memset(&cfg, 0, sizeof(cfg));
   load_cfg(NULL);
   if (strcmp(cfg.fmt, "_%s_ [%s] %s:%s\n\t") != 0)
     ck_abort_msg("incorrect fmt: %s", cfg.fmt);

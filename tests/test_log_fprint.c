@@ -12,6 +12,7 @@ START_TEST(test_log_fprint_basic) {
   log_info info = {
       .filename = "test.c", .level = INFO, .funcname = "main", .line = "10"};
 
+  memset(&cfg, 0, sizeof(cfg));
   load_default_cfg();
   long cur = ftell(f);
   time_t t = time(NULL);

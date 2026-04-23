@@ -1,6 +1,7 @@
 #include "test.h"
 
 START_TEST(test_load_default_cfg_basic) {
+  memset(&cfg, 0, sizeof(cfg));
   load_default_cfg();
   ck_assert_str_eq(cfg.fmt, DEFAULT_FORMAT);
   ck_assert_str_eq(cfg.date_fmt, DEFAULT_DATE_FORMAT);
