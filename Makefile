@@ -14,7 +14,7 @@ DEPS:= $(OBJS:.o=.d)
 
 export TARGET:= $(BIN_DIR)/qlog.a
 
-.phony: all clean debug test build_dir debug release format clear
+.phony: all clean debug test build_dir debug release format clear release_shared
 
 all: $(TARGET)
 
@@ -44,11 +44,14 @@ debug: CFLAGS += -g -O0
 debug: clean test
 	@CK_FORK=no; lldb $(BIN_DIR)/test
 	@echo "--- builded with debug flags ---"
-	
+
 release: CFLAGS += -O3
 release: clean all
 	@echo "--- Release build ---"
 
+release_shared: CFLAGS += -fPIC -O3
+release_shared: clean build_dir $(OBJS)
+	$(CC) --shared $(OBJS) -o $(BIN_DIR)/qlog.so
 
 format:
 	clang-format -i */*.c */*.h --style=Google
