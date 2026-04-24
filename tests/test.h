@@ -4,6 +4,7 @@
 #include <check.h>
 #include <stdio.h>
 
+#define LOG_ON
 #include "helpers.h"
 #include "log.h"
 #include "macro.h"

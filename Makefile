@@ -58,5 +58,5 @@ format:
 
 clear: clean
 clean:
-	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/* $(TEST_DIR)/*.log
+	rm -rf $(BIN_DIR)/* $(BUILD_DIR)/* *.log
 	@echo "--- clean up complete ---"

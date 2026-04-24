@@ -40,12 +40,16 @@ enum log_array_sizes { MAX_FMT = 64, MAX_BUF = 256, CNT_INFO_FIELDS = 4 };
 #define LOGF(fmt, ...) LOG(FATAL, fmt, ##__VA_ARGS__)
 
 // print log with meta info
+#ifdef LOG_ON
 #define LOG(LEVEL, fmt, ...)                       \
   log_msg((log_info){.filename = __FILE__,         \
                      .funcname = __func__,         \
                      .level = LEVEL,               \
                      .line = LOG_TOSTR(__LINE__)}, \
           fmt, ##__VA_ARGS__)
+#else
+#define LOG(LEVEL, fmt, ...)
+#endif
 
 // Contains meta info about running programm
 typedef struct log_info {
