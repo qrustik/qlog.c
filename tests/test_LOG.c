@@ -15,6 +15,9 @@ START_TEST(test_LOG_BASIC) {
   f = freopen("hello.log", "a", stderr);
   LOGI("HELLO LOG\n");
   fclose(f);
+
+  LOGI("HELLO FILE!");
+
   ck_abort_msg(res);
 }
 END_TEST
