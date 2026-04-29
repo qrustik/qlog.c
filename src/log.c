@@ -23,11 +23,11 @@ void log_msg(log_info info, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
   if (cfg.wr_file) {
-    FILE* f = fopen(cfg.filepath, "a");
+    FILE* f = fopen(cfg.filepath, "a+");
     if (f) {
-      log_fprint(stderr, &info);
-      vfprintf(stderr, fmt, args);
-      fprintf(stderr, "\n");
+      log_fprint(f, &info);
+      vfprintf(f, fmt, args);
+      fprintf(f, "\n");
       fclose(f);
     } else {
       fprintf(stderr, "Cannot open file %s\n", cfg.filepath);
